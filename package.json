@@ -1,0 +1,14 @@
+{
+  "name": "gsc-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "gsc": "./cli.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "googleapis": "^144.0.0",
+    "zod": "^4.4.3"
+  }
+}
