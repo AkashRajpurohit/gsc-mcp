@@ -1,65 +1,225 @@
-# gsc-mcp
+<div align="center" width="100%">
+  <h2>🔍 gsc-mcp</h2>
+  <p>Give your AI assistant read access to your <a href="https://search.google.com/search-console">Google Search Console</a> data — across every property you own.</p>
+  <a target="_blank" href="https://github.com/AkashRajpurohit/gsc-mcp/stargazers"><img src="https://img.shields.io/github/stars/AkashRajpurohit/gsc-mcp" /></a>
+  <a target="_blank" href="https://github.com/AkashRajpurohit/gsc-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AkashRajpurohit/gsc-mcp" /></a>
+  <img alt="Node version" src="https://img.shields.io/badge/node-%3E%3D22.5-339933?logo=nodedotjs&logoColor=white" />
+  <img alt="MCP server" src="https://img.shields.io/badge/MCP-server-1f1f1f" />
+  <img alt="Visitors" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fvc.akashrajpurohit.com%2Fc%2Fakash~gh~gsc-mcp&query=count&style=flat&logo=github&label=Visitors&color=066da5" />
+  <a target="_blank" href="https://ko-fi.com/akashrajpurohit"><img src="https://img.shields.io/badge/Ko--fi-F16061?style=flat-square&logo=ko-fi&logoColor=white" /></a>
+  <a target="_blank" href="https://akashrajpurohit.com/sponsors/?ref=gsc-mcp"><img src="https://img.shields.io/badge/Sponsor-AkashRajpurohit-F16061?style=flat-square&logoColor=white" /></a>
+  <a target="_blank" href="https://twitter.com/akashwhocodes"><img alt="follow on twitter" src="https://img.shields.io/twitter/follow/akashwhocodes.svg?style=social&label=@akashwhocodes" /></a>
+  <br />
+  <br />
+  <p align="center">
+    <a href="https://github.com/AkashRajpurohit/gsc-mcp/issues/new?template=bug_report.yml">Bug report</a>
+    ·
+    <a href="https://github.com/AkashRajpurohit/gsc-mcp/issues/new?template=feature_request.yml">Feature request</a>
+    ·
+    <a href="https://github.com/AkashRajpurohit?tab=repositories">More projects</a>
+  </p>
+</div>
+<hr />
 
-A small Model Context Protocol (MCP) server that gives an MCP client (e.g. Claude Code) read access to Google Search Console across one or more verified properties. One service account is granted on each property, so the same server serves every site you own.
+Checking how a site is doing on Google usually means logging into Search Console, picking a property, fiddling with date ranges, and eyeballing charts. This connects your assistant (Claude Code, Claude Desktop, Cursor, or any MCP client) straight to the Search Console API, so you can just ask — "what are my top queries this month?" or "is this page indexed yet?" — and get the numbers back in seconds.
 
-## Architecture
+One service-account credential covers **all** your properties at once, so you can ask across sites without switching accounts. And because the credential is read-only, your assistant can look but never touch.
+
+## ✨ What it does and does not do
+
+**It does:**
+
+- List every Search Console property the credential can read.
+- Pull clicks, impressions, CTR, and average position — grouped by query, page, date, country, device, or search appearance.
+- Check the index status of any URL (indexed or not, last crawl, canonical, coverage state, mobile usability).
+- Show your submitted sitemaps and their indexed-vs-submitted counts.
+
+**It does not:**
+
+- **Write anything.** The credential uses Google's read-only Search Console scope, so it cannot submit sitemaps, change settings, add or remove properties, or modify your account in any way.
+- Bypass Search Console's own data limits. It sees exactly what the API exposes — the same ~16-month window and sampling Google gives everyone.
+- Send your data anywhere except between your machine and Google's API. There is no third-party server in the middle.
+
+## 📦 Before you start
+
+You need:
+
+- A **Google Cloud project** and the `gcloud` CLI (or the Cloud Console) to create a service account.
+- One or more **verified Google Search Console properties** you can grant access on.
+- **[Node.js](https://nodejs.org/) 22.5 or newer.**
+- An MCP-capable assistant (for example [Claude Code](https://claude.com/claude-code)).
+
+## 🔑 Get a credential
+
+The server authenticates as a **service account** — a robot Google identity with its own email. You create it once, grant it read access on each property, and it can then read all of them.
+
+### 1. Create the service account and key
+
+```bash
+gcloud config set project YOUR_PROJECT_ID
+gcloud services enable searchconsole.googleapis.com
+gcloud iam service-accounts create gsc-reader --display-name="GSC Reader"
+
+mkdir -p ~/.config/gsc-mcp
+gcloud iam service-accounts keys create ~/.config/gsc-mcp/key.json \
+  --iam-account=gsc-reader@YOUR_PROJECT_ID.iam.gserviceaccount.com
+```
+
+That writes a JSON key to `~/.config/gsc-mcp/key.json`. Keep it private — it is a credential, not config. (This repo's `.gitignore` already blocks `*key*.json` so you can't commit it by accident.)
+
+The service account lives in one Cloud project, but its identity works for any property you grant it on — the project choice does not matter.
+
+### 2. Grant it on each property
+
+In [Search Console](https://search.google.com/search-console), open each property → **Settings → Users and permissions → Add user**. Add the service-account email (`gsc-reader@YOUR_PROJECT_ID.iam.gserviceaccount.com`) with the **Restricted** (read) role.
+
+Adding a new site later is just one more grant here — no code or config changes.
+
+## 🚀 Install
+
+```bash
+git clone https://github.com/AkashRajpurohit/gsc-mcp.git
+cd gsc-mcp
+npm install
+```
+
+Then register it with your assistant. Note the full path to `mcp.mjs` — you will need it below:
+
+```bash
+echo "$PWD/mcp.mjs"
+```
+
+### Claude Code
+
+```bash
+claude mcp add gsc --scope user -- node "$PWD/mcp.mjs"
+```
+
+`--scope user` registers it for every Claude Code session on the machine. Restart the session (or start a new one) to pick up the tools.
+
+### Claude Desktop
+
+Open **Settings → Developer → Edit Config** (or edit `claude_desktop_config.json` directly) and add:
+
+```json
+{
+  "mcpServers": {
+    "gsc": {
+      "command": "node",
+      "args": ["/absolute/path/to/gsc-mcp/mcp.mjs"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop.
+
+### Cursor
+
+Open **Settings → MCP → Add new global MCP server** (or edit `~/.cursor/mcp.json`) and add the same `gsc` entry as above:
+
+```json
+{
+  "mcpServers": {
+    "gsc": {
+      "command": "node",
+      "args": ["/absolute/path/to/gsc-mcp/mcp.mjs"]
+    }
+  }
+}
+```
+
+### Windsurf
+
+Edit `~/.codeium/windsurf/mcp_config.json` and add the same `gsc` entry under `mcpServers`.
+
+### VS Code (GitHub Copilot)
+
+Add it to `.vscode/mcp.json` in your workspace (or run **MCP: Add Server** from the Command Palette):
+
+```json
+{
+  "servers": {
+    "gsc": {
+      "command": "node",
+      "args": ["/absolute/path/to/gsc-mcp/mcp.mjs"]
+    }
+  }
+}
+```
+
+> If your key is not at the default path, add `"env": { "GSC_KEY_PATH": "/absolute/path/to/key.json" }` to any of the entries above.
+
+### Any other MCP client
+
+Register a **stdio** server that runs `node /absolute/path/to/gsc-mcp/mcp.mjs`. That is all the server needs.
+
+Once registered, start a new session and ask your assistant to "list my Search Console sites." If it comes back with your properties, you are ready.
+
+## 💬 How to use it
+
+Just talk to your assistant. For example:
+
+- "List all my Search Console properties."
+- "What are my top 20 queries for example.com over the last 28 days?"
+- "Show me the pages losing clicks this month compared to last."
+- "Which queries have high impressions but a low CTR?"
+- "Is `https://example.com/blog/my-post/` indexed by Google?"
+- "How many URLs did my sitemap submit vs get indexed?"
+
+Behind the scenes it offers four tools your assistant uses automatically:
+
+| Tool | What it does |
+|------|--------------|
+| `gsc_list_sites` | Lists readable properties and their exact `siteUrl` values. |
+| `gsc_search_analytics` | Clicks, impressions, CTR, and position grouped by query, page, date, country, device, or search appearance. |
+| `gsc_inspect_url` | Index status of a single URL (indexed, last crawl, canonical, coverage). |
+| `gsc_list_sitemaps` | Submitted vs indexed counts per sitemap, with errors and warnings. |
+
+Every tool is **read-only** — the underlying credential physically cannot change anything in your account.
+
+## 🧪 Try it without an assistant
+
+There's a small CLI wrapping the same core, handy for a sanity check:
+
+```bash
+node cli.mjs sites
+node cli.mjs perf     "sc-domain:example.com"
+node cli.mjs pages    "sc-domain:example.com"
+node cli.mjs queries  "sc-domain:example.com"
+node cli.mjs inspect  "sc-domain:example.com" "https://example.com/blog/my-post/"
+node cli.mjs sitemaps "sc-domain:example.com"
+```
+
+Domain properties look like `sc-domain:example.com`; URL-prefix properties look like `https://example.com/`. Run `node cli.mjs sites` first to see the exact `siteUrl` for each of your properties.
+
+## ⚙️ Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GSC_KEY_PATH` | `~/.config/gsc-mcp/key.json` | Path to the service-account JSON key. |
+
+## 🏗️ How it fits together
 
 ```
 MCP client ──stdio──▶ mcp.mjs ──▶ gsc.mjs ──▶ Google Search Console API
                       (tools)     (auth + calls)   (service-account key)
 ```
 
-- `gsc.mjs` — Google API client. Authenticates with a service-account key and wraps the Search Console API: sites, search analytics, URL inspection, sitemaps.
-- `mcp.mjs` — MCP server (stdio transport) that exposes the tools to the client.
-- `cli.mjs` — the same core, runnable by hand for testing (e.g. `node cli.mjs sites`).
-- Credential — a service-account JSON key, kept outside this repo (default path `~/.config/gsc-mcp/key.json`, override with `GSC_KEY_PATH`).
+- `gsc.mjs` — the Google API client. Authenticates with the service-account key and wraps the Search Console API (sites, search analytics, URL inspection, sitemaps).
+- `mcp.mjs` — the MCP server (stdio transport) that exposes those tools to your assistant.
+- `cli.mjs` — the same core, runnable by hand.
 
-## Tools
+The core (`gsc.mjs`) is transport-agnostic. To run this as an always-on remote MCP instead of a local stdio process, containerize it, expose it over HTTP/SSE behind an authenticating proxy, mount the key as a secret, and register the remote URL with your client — only the hosting changes.
 
-| Tool | Purpose |
-|------|---------|
-| `gsc_list_sites` | List readable properties and their exact `siteUrl` values. |
-| `gsc_search_analytics` | Clicks, impressions, CTR, and position grouped by query, page, date, country, or device. |
-| `gsc_inspect_url` | Index status of a single URL (indexed, last crawl, canonical, coverage). |
-| `gsc_list_sitemaps` | Submitted vs indexed counts per sitemap. |
+## 🩺 If it can't find your sites
 
-## Setup
+- **`gsc_list_sites` returns an empty list** — the service account isn't granted on any property yet. Re-check step 2: the email you added in Search Console must match your key's `client_email` exactly.
+- **Auth or "file not found" errors** — the key isn't where the server expects it. Confirm the path, or set `GSC_KEY_PATH` to point at it.
+- **A specific property 403s** — that one property hasn't been shared with the service account. Add it under Users and permissions.
 
-### 1. Create the service account (one time)
+## ⚖️ Licensing and disclaimer
 
-```bash
-gcloud config set project YOUR_PROJECT_ID
-gcloud services enable searchconsole.googleapis.com
-gcloud iam service-accounts create gsc-reader --display-name="GSC Reader"
-gcloud iam service-accounts keys create ~/.config/gsc-mcp/key.json \
-  --iam-account=gsc-reader@YOUR_PROJECT_ID.iam.gserviceaccount.com
-```
+**This project is not affiliated with, endorsed by, or associated with Google in any way.** It is an independent, open-source tool that talks to Google's public Search Console API using credentials you create and control. "Google Search Console" is a trademark of Google LLC and is used here only to describe what the tool works with.
 
-The service account lives in one project, but its identity works for any property you grant it on — the project choice does not matter.
-
-### 2. Grant it on each property
-
-In Google Search Console, open each property and go to Settings → Users and permissions → Add user. Add the service-account email (`gsc-reader@YOUR_PROJECT_ID.iam.gserviceaccount.com`) with the Restricted role (read access). Adding a new site later is just one more grant here.
-
-### 3. Install and register
-
-```bash
-npm install
-claude mcp add gsc --scope user -- node "$PWD/mcp.mjs"
-```
-
-`--scope user` registers it for every Claude Code session on the machine. Restart the session (or start a new one) to pick up the tools.
-
-## Configuration
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GSC_KEY_PATH` | `~/.config/gsc-mcp/key.json` | Path to the service-account JSON key. |
-
-## Using the same credential from other services
-
-The MCP server is only for interactive clients. A background service (cron job, digest, monitor) can reuse the same service-account key and call the Search Console API directly. Nothing in this repo needs to change to support that; both are independent consumers of one credential.
-
-## Deploying as a hosted service
-
-To run this as an always-on remote MCP instead of a local stdio process, containerize it, expose it over HTTP/SSE behind a reverse proxy with auth, mount the key as a secret, and register the remote URL with the client. The core (`gsc.mjs`) is unchanged; only the transport and hosting differ.
+The tool is released under the MIT license (see `LICENSE`). It is provided as-is, with no warranty. It only ever uses Google's read-only Search Console scope, so it can read your data but never modify your account.

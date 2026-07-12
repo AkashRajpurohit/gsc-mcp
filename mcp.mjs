@@ -14,7 +14,7 @@ const TOOLS = [
   {
     name: 'gsc_list_sites',
     description:
-      'List all Google Search Console properties this credential can read (datahyena, catchintent, eternalvault, memorycrow, etc.). Returns the exact siteUrl to pass to other tools (domain properties look like "sc-domain:datahyena.com").',
+      'List all Google Search Console properties this credential can read. Returns the exact siteUrl to pass to other tools (domain properties look like "sc-domain:example.com", URL-prefix properties look like "https://example.com/").',
     inputSchema: { type: 'object', properties: {} },
   },
   {
@@ -24,7 +24,7 @@ const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
-        site: { type: 'string', description: 'siteUrl from gsc_list_sites, e.g. "sc-domain:datahyena.com"' },
+        site: { type: 'string', description: 'siteUrl from gsc_list_sites, e.g. "sc-domain:example.com"' },
         days: { type: 'number', description: 'Lookback window in days from yesterday (default 28). Ignored if startDate given.' },
         startDate: { type: 'string', description: 'YYYY-MM-DD (overrides days)' },
         endDate: { type: 'string', description: 'YYYY-MM-DD (default yesterday)' },
@@ -47,8 +47,8 @@ const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
-        site: { type: 'string', description: 'siteUrl, e.g. "sc-domain:datahyena.com"' },
-        url: { type: 'string', description: 'Full URL to inspect, e.g. https://datahyena.com/funding-rounds/by-month/april-2026/' },
+        site: { type: 'string', description: 'siteUrl, e.g. "sc-domain:example.com"' },
+        url: { type: 'string', description: 'Full URL to inspect, e.g. https://example.com/blog/my-post/' },
       },
       required: ['site', 'url'],
     },

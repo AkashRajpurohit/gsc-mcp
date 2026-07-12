@@ -1,14 +1,35 @@
 {
   "name": "gsc-mcp",
   "version": "0.1.0",
-  "private": true,
+  "description": "An MCP server that gives your AI assistant read access to your Google Search Console properties.",
   "type": "module",
+  "license": "MIT",
+  "author": "Akash Rajpurohit",
+  "homepage": "https://github.com/AkashRajpurohit/gsc-mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AkashRajpurohit/gsc-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AkashRajpurohit/gsc-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "google-search-console",
+    "gsc",
+    "seo",
+    "claude",
+    "ai"
+  ],
+  "engines": {
+    "node": ">=22.5"
+  },
   "bin": {
     "gsc": "./cli.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "googleapis": "^144.0.0",
-    "zod": "^4.4.3"
+    "googleapis": "^144.0.0"
   }
 }
