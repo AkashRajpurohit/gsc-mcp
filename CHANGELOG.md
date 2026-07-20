@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-20
+
 ### Added
 
 - `datePreset` on `gsc_search_analytics` and `compare_search_performance`: a rolling window ending yesterday (`last_7_days`, `last_28_days`, `last_3_months`, `last_6_months`, `last_12_months`, `last_16_months`), so you do not have to compute start and end dates. It takes precedence over `days`; an explicit `startDate`/`endDate` still wins.
@@ -14,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Automated GitHub Release notes now include a link to the full changelog.
 - The release workflow skips publishing or creating a release if that version is already published or the release already exists, so re-runs and first-release bootstraps do not fail.
+- The release workflow now fails if the pushed tag does not match the version in package.json.
 
 ## [0.4.1] - 2026-07-20
 
@@ -84,8 +87,8 @@ First release published to npm as `@akashrajpurohit/gsc-mcp`.
 
 - Initial MCP server exposing four read-only Google Search Console tools: `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
 
-[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/AkashRajpurohit/gsc-mcp/releases/tag/v0.2.0
