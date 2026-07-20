@@ -6,8 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-20
+
+### Added
+
+- Tool errors now include a short, actionable hint for common failures (quota or rate limits, a property the service account cannot read, a disabled API, authentication problems, and network issues), alongside the original message. Credential material is still never leaked.
+
 ### Changed
 
+- Reorganized the source into focused modules under `lib/` (tools, analytics, compare, server, and a `util/` folder for constants, dates, validation, and errors). No behavior change.
 - `npm version` now checks that the CHANGELOG has a section for the new version, so a release cannot be tagged without its changelog entry.
 
 ## [0.5.0] - 2026-07-20
@@ -91,7 +98,8 @@ First release published to npm as `@akashrajpurohit/gsc-mcp`.
 
 - Initial MCP server exposing four read-only Google Search Console tools: `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
 
-[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.3.0...v0.4.0

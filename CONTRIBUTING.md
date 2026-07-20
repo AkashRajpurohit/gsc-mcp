@@ -46,10 +46,14 @@ node bin/gsc-mcp.mjs sites
 
 | Path | Responsibility |
 |------|----------------|
-| `lib/gsc.mjs` | Google API client: credential loading and read-only Search Console calls. |
-| `lib/mcp.mjs` | MCP server, tool definitions, input validation, error sanitization. |
-| `lib/doctor.mjs` | The `gsc-mcp doctor` diagnostic. |
 | `bin/gsc-mcp.mjs` | Executable entry point (server plus `doctor`, `--help`, `--version`, and read commands). |
+| `lib/server.mjs` | MCP server bootstrap. |
+| `lib/tools.mjs` | Tool definitions and the request dispatcher. |
+| `lib/analytics.mjs` | Search Analytics query logic. |
+| `lib/compare.mjs` | Period-over-period comparison logic. |
+| `lib/gsc.mjs` | Google API client: credential loading and read-only Search Console calls. |
+| `lib/doctor.mjs` | The `gsc-mcp doctor` diagnostic. |
+| `lib/util/` | Shared helpers: constants, date math, input validation, and error handling. |
 | `test/` | Offline test suite. |
 
 ## Guidelines

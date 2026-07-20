@@ -1,11 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  TOOLS,
-  handleToolCall,
-  buildAnalyticsBody,
-  sanitize,
-} from '../lib/mcp.mjs';
+import { TOOLS, handleToolCall } from '../lib/tools.mjs';
+import { buildAnalyticsBody } from '../lib/analytics.mjs';
+import { sanitize, describeError } from '../lib/util/errors.mjs';
 
 function fakeGsc(overrides = {}) {
   const calls = [];
@@ -444,6 +441,43 @@ test('a leaked credential in an error is redacted', async () => {
   assert.doesNotMatch(res.content[0].text, /SECRETMATERIAL/);
   assert.doesNotMatch(res.content[0].text, /BEGIN PRIVATE KEY/);
   assert.match(res.content[0].text, /REDACTED/);
+});
+
+test('describeError adds a quota hint and keeps the original message', () => {
+  const out = describeError({ code: 429, message: 'Quota exceeded for quota metric requests.' });
+  assert.match(out, /quota or rate limit/i);
+  assert.match(out, /original: Quota exceeded/);
+});
+
+test('describeError adds a permission hint', () => {
+  assert.match(describeError({ code: 403, message: 'User does not have sufficient permission for site.' }), /Users and permissions/);
+});
+
+test('describeError reports a disabled API even when the status is 403', () => {
+  const out = describeError({ code: 403, message: 'Search Console API has not been used in project 123 or it is disabled.' });
+  assert.match(out, /gcloud services enable searchconsole/);
+});
+
+test('describeError adds an auth hint', () => {
+  assert.match(describeError({ message: 'invalid_grant: Invalid JWT Signature.' }), /doctor/);
+});
+
+test('describeError adds a not-found hint for a missing property', () => {
+  assert.match(describeError({ message: 'Requested entity was not found.' }), /gsc_list_sites/);
+});
+
+test('describeError adds a network hint', () => {
+  assert.match(describeError({ code: 'ENOTFOUND', message: 'getaddrinfo ENOTFOUND www.googleapis.com' }), /network/i);
+});
+
+test('describeError does not mistake a missing key file for a missing property', () => {
+  const out = describeError({ message: 'Service-account key not found at /x/key.json. Set GSC_KEY_PATH or create the key (see README).' });
+  assert.doesNotMatch(out, /gsc_list_sites/);
+  assert.match(out, /Service-account key not found/);
+});
+
+test('describeError passes an unrecognized error through unchanged', () => {
+  assert.equal(describeError({ message: 'weird thing happened' }), 'weird thing happened');
 });
 
 test('sanitize strips PEM blocks and secret fields', () => {

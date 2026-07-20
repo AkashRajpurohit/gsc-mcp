@@ -220,7 +220,7 @@ The server is read-only, runs locally, and collects no telemetry. Your key is re
 
 ## Troubleshooting
 
-Run `npx @akashrajpurohit/gsc-mcp doctor` first, since it catches most problems. Common ones:
+Run `npx @akashrajpurohit/gsc-mcp doctor` first, since it catches most problems. When a tool call fails, the error also carries a short hint on how to fix it. Common ones:
 
 - **`sites` returns an empty list:** the service account is not granted on any property yet. The email you added in Search Console must match the key's `client_email` exactly.
 - **Auth or "file not found" errors:** the key is not where the server expects it. Check the path or set `GSC_KEY_PATH`.
@@ -245,11 +245,15 @@ Tests use Node's built-in runner and are fully offline: no network and no real c
 
 | Path              | Responsibility                                                                           |
 | ----------------- | ---------------------------------------------------------------------------------------- |
-| `lib/gsc.mjs`     | Google API client: credential loading and read-only Search Console calls.                |
-| `lib/mcp.mjs`     | MCP server, tool definitions, input validation, error sanitization.                      |
-| `lib/doctor.mjs`  | The `gsc-mcp doctor` diagnostic.                                                         |
 | `bin/gsc-mcp.mjs` | Executable entry point (server plus `doctor`, `--help`, `--version`, and read commands). |
-| `test/`           | Offline test suite.                                                                      |
+| `lib/server.mjs` | MCP server bootstrap. |
+| `lib/tools.mjs` | Tool definitions and the request dispatcher. |
+| `lib/analytics.mjs` | Search Analytics query logic. |
+| `lib/compare.mjs` | Period-over-period comparison logic. |
+| `lib/gsc.mjs` | Google API client: credential loading and read-only Search Console calls. |
+| `lib/doctor.mjs` | The `gsc-mcp doctor` diagnostic. |
+| `lib/util/` | Shared helpers: constants, date math, input validation, and error handling. |
+| `test/` | Offline test suite. |
 
 Releases are cut by pushing a `v*` tag, which runs the publish workflow (`.github/workflows/release.yml`). Publishing uses npm trusted publishing (OIDC), so no npm token is stored and provenance is attached automatically. Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
 

@@ -48,9 +48,9 @@ Docs: https://github.com/AkashRajpurohit/gsc-mcp
 const ago = (d) => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
 const print = (x) => process.stdout.write(`${JSON.stringify(x, null, 2)}\n`);
 
-async function fail(message) {
-  const { sanitize } = await import('../lib/mcp.mjs');
-  process.stderr.write(`ERROR: ${sanitize(message)}\n`);
+async function fail(error) {
+  const { describeError, sanitize } = await import('../lib/util/errors.mjs');
+  process.stderr.write(`ERROR: ${sanitize(describeError(error))}\n`);
   process.exit(1);
 }
 
@@ -67,7 +67,7 @@ async function runSanity(cmd, rest) {
     else if (cmd === 'inspect') print(await gsc.inspectUrl(rest[0], rest[1]));
     else if (cmd === 'sitemaps') print(await gsc.listSitemaps(rest[0]));
   } catch (e) {
-    await fail(e?.message ?? String(e));
+    await fail(e);
   }
 }
 
@@ -85,7 +85,7 @@ if (cmd === '--version' || cmd === '-v' || cmd === 'version') {
   process.stdout.write(`${formatDoctor(report)}\n`);
   process.exit(report.ok ? 0 : 1);
 } else if (cmd === undefined || cmd === 'serve' || cmd === 'start') {
-  const { start } = await import('../lib/mcp.mjs');
+  const { start } = await import('../lib/server.mjs');
   await start();
 } else if (['sites', 'perf', 'pages', 'queries', 'inspect', 'sitemaps'].includes(cmd)) {
   await runSanity(cmd, args.slice(1));

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { handleToolCall } from '../lib/mcp.mjs';
+import { handleToolCall } from '../lib/tools.mjs';
 
 function makeGsc(byStart = {}) {
   const calls = [];
