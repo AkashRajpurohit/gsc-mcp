@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-07-20
+
+First stable release. The seven tools and their input and output shapes are now considered stable.
+
+### Changed
+
+- Declared a stable public API: the tool names and their inputs and outputs follow semantic versioning, with breaking changes reserved for future major releases. The server remains read-only.
+
 ## [0.9.0] - 2026-07-20
 
 ### Added
@@ -116,7 +124,8 @@ First release published to npm as `@akashrajpurohit/gsc-mcp`.
 
 - Initial MCP server exposing four read-only Google Search Console tools: `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
 
-[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.6.0...v0.7.0

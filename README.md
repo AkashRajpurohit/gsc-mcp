@@ -254,6 +254,10 @@ Run `gsc-mcp --help` for the full list. Domain properties look like `sc-domain:e
 | `GSC_MAX_RETRIES` | `3` | How many times to retry transient failures (429, 5xx, dropped connections). `0` disables retries. |
 | `GSC_RETRY_BASE_MS` | `500` | Base delay for the exponential backoff between retries. |
 
+## Stability
+
+As of 1.0.0 the tool names and their input and output shapes are stable and follow [semantic versioning](https://semver.org/). Breaking changes to a tool's inputs or outputs will only land in a future major release. New optional inputs and additive fields may arrive in minor releases. The server stays read-only.
+
 ## Security & privacy
 
 The server is read-only, runs locally, and collects no telemetry. Your key is read from disk and sent only to Google, never anywhere else, and errors are sanitized so key material never lands in logs or transcripts. Full details and how to report a vulnerability are in [SECURITY.md](SECURITY.md).
