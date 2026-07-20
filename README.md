@@ -1,6 +1,6 @@
 <div align="center" width="100%">
   <h2>🔍 gsc-mcp</h2>
-  <p>Give your AI assistant read access to your <a href="https://search.google.com/search-console">Google Search Console</a> data — across every property you own.</p>
+  <p>Give your AI assistant <strong>read-only</strong> access to your <a href="https://search.google.com/search-console">Google Search Console</a> data — local, private, and across every property you own.</p>
   <a target="_blank" href="https://github.com/AkashRajpurohit/gsc-mcp/stargazers"><img src="https://img.shields.io/github/stars/AkashRajpurohit/gsc-mcp" /></a>
   <a target="_blank" href="https://github.com/AkashRajpurohit/gsc-mcp/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AkashRajpurohit/gsc-mcp" /></a>
   <img alt="Node version" src="https://img.shields.io/badge/node-%3E%3D22.5-339933?logo=nodedotjs&logoColor=white" />
@@ -21,9 +21,18 @@
 </div>
 <hr />
 
-Checking how a site is doing on Google usually means logging into Search Console, picking a property, fiddling with date ranges, and eyeballing charts. This connects your assistant (Claude Code, Claude Desktop, Cursor, or any MCP client) straight to the Search Console API, so you can just ask — "what are my top queries this month?" or "is this page indexed yet?" — and get the numbers back in seconds.
+Checking how a site is doing on Google usually means logging into Search Console, picking a property, fiddling with date ranges, and squinting at charts. `gsc-mcp` wires your assistant — Claude Code, Claude Desktop, Cursor, or any MCP client — straight to the Search Console API, so you can just ask _"what are my top queries this month?"_ or _"is this page indexed yet?"_ and get real numbers back in seconds.
 
-One service-account credential covers **all** your properties at once, so you can ask across sites without switching accounts. And because the credential is read-only, your assistant can look but never touch.
+It's built to be **safe by construction**:
+
+- 🔒 **Read-only.** It uses Google's read-only Search Console scope, so your assistant can look but _physically_ cannot submit, change, or delete anything.
+- 🏠 **Local & private.** It runs on your own machine and talks only to Google — no third-party server in the middle, no telemetry, no accounts.
+- 🗝️ **One credential, every property.** A single service-account key covers all the sites you own, so you can ask across properties without switching accounts.
+
+<!-- TODO: demo GIF — record with `asciinema rec demo.cast`, convert with `agg demo.cast demo.gif`, then replace the line below -->
+<div align="center">
+  <em>Demo coming soon.</em>
+</div>
 
 ## ✨ What it does and does not do
 
@@ -217,6 +226,27 @@ The core (`gsc.mjs`) is transport-agnostic. To run this as an always-on remote M
 - **`gsc_list_sites` returns an empty list** — the service account isn't granted on any property yet. Re-check step 2: the email you added in Search Console must match your key's `client_email` exactly.
 - **Auth or "file not found" errors** — the key isn't where the server expects it. Confirm the path, or set `GSC_KEY_PATH` to point at it.
 - **A specific property 403s** — that one property hasn't been shared with the service account. Add it under Users and permissions.
+
+## 🧑‍💻 Contributing
+
+The project is deliberately small and dependency-light. To work on it:
+
+```bash
+git clone https://github.com/AkashRajpurohit/gsc-mcp.git
+cd gsc-mcp
+npm install
+npm test
+```
+
+Tests use Node's built-in test runner (`node --test`) — there is **no extra test dependency** to install. They are fully offline: every Google call is mocked or fixture-based, so **you do not need valid Google credentials to run them, and nothing touches the network.** The suite covers each MCP tool, the Search Console API wrapper, argument validation, credential loading (missing/malformed keys), and simulated Google API failures (permission, quota, invalid property, unavailable URL), and it asserts that credential material is never echoed in error messages.
+
+Run the suite with:
+
+```bash
+npm test
+```
+
+CI runs the same command on every push and pull request across supported Node.js versions (22.x and 24.x).
 
 ## ⚖️ Licensing and disclaimer
 
