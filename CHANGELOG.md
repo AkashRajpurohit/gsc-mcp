@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-20
+
+Completes the `gsc_search_analytics` tool.
+
+### Added
+
+- Dimension `filters`: an array of `{ dimension, operator, expression }`, all combined with AND
+  (operators: `equals`, `notEquals`, `contains`, `notContains`, `includingRegex`, `excludingRegex`;
+  operator defaults to `equals`). `filterPage` still works and combines with them.
+- `dataState` (`final` | `all`) and `aggregationType` (`auto` | `byProperty` | `byPage`).
+- `siteUrl` accepted as an alias for `site`.
+- Automatic pagination: `rowLimit` may exceed the API's 25,000-per-request limit and is fetched
+  across pages, bounded by a configurable `maxRows` safety ceiling. `startRow` allows manual paging.
+- Structured response: rows are now wrapped with metadata — `siteUrl`, `period`, `dimensions`,
+  `searchType`, `dataState`, `aggregationType`, `startRow`, `rowCount`, `hasMore`, and `warnings`.
+
+### Changed
+
+- `gsc_search_analytics` now returns the metadata-wrapped object above instead of the raw Google
+  API response. Rows remain under `rows`.
+- The default `rowLimit` is now 1000 (was 100).
+
 ## [0.2.0] - 2026-07-20
 
 First release published to npm as `@akashrajpurohit/gsc-mcp`.
@@ -47,5 +69,6 @@ First release published to npm as `@akashrajpurohit/gsc-mcp`.
 - Initial MCP server exposing four read-only Google Search Console tools:
   `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
 
-[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/AkashRajpurohit/gsc-mcp/releases/tag/v0.2.0

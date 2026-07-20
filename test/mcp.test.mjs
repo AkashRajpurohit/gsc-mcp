@@ -41,6 +41,23 @@ function parse(res) {
   return JSON.parse(res.content[0].text);
 }
 
+function pagedGsc(total) {
+  const calls = [];
+  return {
+    calls,
+    listSites: async () => [],
+    inspectUrl: async () => ({}),
+    listSitemaps: async () => [],
+    searchAnalytics: async (site, body) => {
+      calls.push(body);
+      const remaining = Math.max(0, total - body.startRow);
+      const n = Math.min(body.rowLimit, remaining);
+      const rows = Array.from({ length: n }, (_, i) => ({ keys: [`k${body.startRow + i}`], clicks: 1 }));
+      return { rows, responseAggregationType: 'byProperty' };
+    },
+  };
+}
+
 test('TOOLS exposes exactly the four read-only tools', () => {
   assert.deepEqual(TOOLS.map((t) => t.name).sort(), [
     'gsc_inspect_url',
@@ -68,8 +85,11 @@ test('gsc_search_analytics builds a default request body', async () => {
   assert.equal(call.args[0], 'sc-domain:example.com');
   const body = call.args[1];
   assert.deepEqual(body.dimensions, ['query']);
-  assert.equal(body.rowLimit, 100);
+  assert.equal(body.rowLimit, 1000);
   assert.equal(body.type, 'web');
+  assert.equal(body.dataState, 'final');
+  assert.equal(body.aggregationType, 'auto');
+  assert.equal(body.startRow, 0);
   assert.match(body.startDate, /^\d{4}-\d{2}-\d{2}$/);
   assert.match(body.endDate, /^\d{4}-\d{2}-\d{2}$/);
 });
@@ -88,10 +108,14 @@ test('gsc_search_analytics honours explicit dates, dimensions and filterPage', a
     startDate: '2026-06-01',
     endDate: '2026-06-30',
     dimensions: ['query', 'page'],
-    rowLimit: 5000,
     type: 'image',
+    dataState: 'final',
+    aggregationType: 'auto',
+    rowLimit: 5000,
+    startRow: 0,
     dimensionFilterGroups: [
       {
+        groupType: 'and',
         filters: [
           { dimension: 'page', operator: 'contains', expression: '/blog/' },
         ],
@@ -154,10 +178,10 @@ test('invalid dimension is rejected before calling Google', async () => {
   assert.equal(gsc.calls.length, 0);
 });
 
-test('rowLimit out of range is rejected', async () => {
+test('a non-integer rowLimit is rejected', async () => {
   const res = await handleToolCall(
     'gsc_search_analytics',
-    { site: 'sc-domain:example.com', rowLimit: 999999 },
+    { site: 'sc-domain:example.com', rowLimit: 1.5 },
     fakeGsc(),
   );
   assert.equal(res.isError, true);
@@ -182,6 +206,158 @@ test('unknown searchType is rejected', async () => {
   );
   assert.equal(res.isError, true);
   assert.match(res.content[0].text, /searchType/);
+});
+
+test('accepts siteUrl as an alias for site', async () => {
+  const gsc = fakeGsc();
+  const res = await handleToolCall(
+    'gsc_search_analytics',
+    { siteUrl: 'sc-domain:example.com' },
+    gsc,
+  );
+  assert.equal(res.isError, undefined);
+  assert.equal(
+    gsc.calls.find((c) => c.name === 'searchAnalytics').args[0],
+    'sc-domain:example.com',
+  );
+});
+
+test('maps filters into a single AND group with a default operator', async () => {
+  const gsc = fakeGsc();
+  await handleToolCall(
+    'gsc_search_analytics',
+    {
+      site: 'sc-domain:example.com',
+      filters: [
+        { dimension: 'country', expression: 'ind' },
+        { dimension: 'device', operator: 'notEquals', expression: 'DESKTOP' },
+      ],
+    },
+    gsc,
+  );
+  const body = gsc.calls.find((c) => c.name === 'searchAnalytics').args[1];
+  assert.deepEqual(body.dimensionFilterGroups, [
+    {
+      groupType: 'and',
+      filters: [
+        { dimension: 'country', operator: 'equals', expression: 'ind' },
+        { dimension: 'device', operator: 'notEquals', expression: 'DESKTOP' },
+      ],
+    },
+  ]);
+});
+
+test('filterPage still works and combines with filters', async () => {
+  const gsc = fakeGsc();
+  await handleToolCall(
+    'gsc_search_analytics',
+    {
+      site: 'sc-domain:example.com',
+      filters: [{ dimension: 'country', expression: 'ind' }],
+      filterPage: '/blog/',
+    },
+    gsc,
+  );
+  const body = gsc.calls.find((c) => c.name === 'searchAnalytics').args[1];
+  assert.deepEqual(body.dimensionFilterGroups[0].filters, [
+    { dimension: 'country', operator: 'equals', expression: 'ind' },
+    { dimension: 'page', operator: 'contains', expression: '/blog/' },
+  ]);
+});
+
+test('rejects a filter with an unknown operator', async () => {
+  const res = await handleToolCall(
+    'gsc_search_analytics',
+    { site: 'sc-domain:example.com', filters: [{ dimension: 'query', operator: 'wat', expression: 'x' }] },
+    fakeGsc(),
+  );
+  assert.equal(res.isError, true);
+  assert.match(res.content[0].text, /operator/);
+});
+
+test('rejects a filter missing its expression', async () => {
+  const res = await handleToolCall(
+    'gsc_search_analytics',
+    { site: 'sc-domain:example.com', filters: [{ dimension: 'query' }] },
+    fakeGsc(),
+  );
+  assert.equal(res.isError, true);
+  assert.match(res.content[0].text, /expression/);
+});
+
+test('passes dataState and aggregationType through to the request', async () => {
+  const gsc = fakeGsc();
+  await handleToolCall(
+    'gsc_search_analytics',
+    { site: 'sc-domain:example.com', dataState: 'all', aggregationType: 'byPage' },
+    gsc,
+  );
+  const body = gsc.calls.find((c) => c.name === 'searchAnalytics').args[1];
+  assert.equal(body.dataState, 'all');
+  assert.equal(body.aggregationType, 'byPage');
+});
+
+test('rejects an unknown dataState', async () => {
+  const res = await handleToolCall(
+    'gsc_search_analytics',
+    { site: 'sc-domain:example.com', dataState: 'draft' },
+    fakeGsc(),
+  );
+  assert.equal(res.isError, true);
+  assert.match(res.content[0].text, /dataState/);
+});
+
+test('wraps rows with request metadata', async () => {
+  const gsc = pagedGsc(3);
+  const res = await handleToolCall(
+    'gsc_search_analytics',
+    { site: 'sc-domain:example.com', startDate: '2026-06-01', endDate: '2026-06-30', dimensions: ['query', 'page'] },
+    gsc,
+  );
+  const out = parse(res);
+  assert.equal(out.siteUrl, 'sc-domain:example.com');
+  assert.deepEqual(out.period, { startDate: '2026-06-01', endDate: '2026-06-30' });
+  assert.deepEqual(out.dimensions, ['query', 'page']);
+  assert.equal(out.rowCount, 3);
+  assert.equal(out.rows.length, 3);
+  assert.equal(out.hasMore, false);
+  assert.equal(out.aggregationType, 'byProperty');
+  assert.deepEqual(out.warnings, []);
+});
+
+test('stops paging when the API returns a short page', async () => {
+  const gsc = pagedGsc(100);
+  const out = parse(await handleToolCall('gsc_search_analytics', { site: 's', rowLimit: 25000 }, gsc));
+  assert.equal(out.rowCount, 100);
+  assert.equal(out.hasMore, false);
+  assert.equal(gsc.calls.length, 1);
+});
+
+test('auto-paginates across API page boundaries then stops at end of data', async () => {
+  const gsc = pagedGsc(26000);
+  const out = parse(await handleToolCall('gsc_search_analytics', { site: 's', rowLimit: 40000, maxRows: 40000 }, gsc));
+  assert.equal(out.rowCount, 26000);
+  assert.equal(out.hasMore, false);
+  assert.equal(gsc.calls.length, 2);
+  assert.equal(gsc.calls[0].startRow, 0);
+  assert.equal(gsc.calls[0].rowLimit, 25000);
+  assert.equal(gsc.calls[1].startRow, 25000);
+});
+
+test('clamps rowLimit to maxRows and warns', async () => {
+  const gsc = pagedGsc(1000);
+  const out = parse(await handleToolCall('gsc_search_analytics', { site: 's', rowLimit: 50000, maxRows: 100 }, gsc));
+  assert.equal(out.rowCount, 100);
+  assert.equal(gsc.calls[0].rowLimit, 100);
+  assert.ok(out.warnings.some((w) => /maxRows/.test(w)));
+});
+
+test('honours startRow for manual pagination', async () => {
+  const gsc = pagedGsc(500);
+  const out = parse(await handleToolCall('gsc_search_analytics', { site: 's', rowLimit: 50, startRow: 200 }, gsc));
+  assert.equal(out.startRow, 200);
+  assert.equal(gsc.calls[0].startRow, 200);
+  assert.equal(out.rowCount, 50);
 });
 
 test('unknown tool name returns an error result', async () => {

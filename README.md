@@ -184,11 +184,45 @@ Behind the scenes it offers four tools your assistant uses automatically:
 | Tool | What it does |
 |------|--------------|
 | `gsc_list_sites` | Lists readable properties and their exact `siteUrl` values. |
-| `gsc_search_analytics` | Clicks, impressions, CTR, and position grouped by query, page, date, country, device, or search appearance. |
+| `gsc_search_analytics` | Clicks, impressions, CTR, and position grouped by query, page, date, country, device, or search appearance — with dimension filters, date ranges, and automatic pagination. |
 | `gsc_inspect_url` | Index status of a single URL (indexed, last crawl, canonical, coverage). |
 | `gsc_list_sitemaps` | Submitted vs indexed counts per sitemap, with errors and warnings. |
 
 Every tool is **read-only** — the underlying credential physically cannot change anything in your account.
+
+### The `gsc_search_analytics` query
+
+You never have to hand-write Google's raw API format — the tool takes a clean input and returns rows plus metadata. A filtered query:
+
+```json
+{
+  "siteUrl": "sc-domain:example.com",
+  "startDate": "2026-06-01",
+  "endDate": "2026-06-30",
+  "dimensions": ["query", "page"],
+  "filters": [
+    { "dimension": "country", "operator": "equals", "expression": "ind" }
+  ],
+  "searchType": "web",
+  "rowLimit": 5000
+}
+```
+
+returns:
+
+```json
+{
+  "siteUrl": "sc-domain:example.com",
+  "period": { "startDate": "2026-06-01", "endDate": "2026-06-30" },
+  "dimensions": ["query", "page"],
+  "rowCount": 842,
+  "hasMore": false,
+  "rows": [],
+  "warnings": []
+}
+```
+
+Highlights: `filters` (multiple, combined with AND; operators `equals`/`notEquals`/`contains`/`notContains`/`includingRegex`/`excludingRegex`), `dataState` (`final` | `all`), `aggregationType` (`auto` | `byProperty` | `byPage`), and automatic pagination — a `rowLimit` above the API's 25,000-per-request cap is fetched across pages, bounded by a `maxRows` safety ceiling. `site` and `siteUrl` are interchangeable.
 
 ## 🧪 Try it without an assistant
 
