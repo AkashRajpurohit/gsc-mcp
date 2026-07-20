@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-07-20
+
+### Added
+
+- `CONTRIBUTING.md`, `ROADMAP.md`, GitHub issue templates (bug report and feature request), and a
+  pull-request template.
+
+### Changed
+
+- The release workflow now creates a GitHub Release from the pushed tag, using that version's
+  changelog section as the notes.
+- README links to the contributing guide and roadmap.
+
 ## [0.4.0] - 2026-07-20
 
 ### Added
@@ -79,7 +92,8 @@ First release published to npm as `@akashrajpurohit/gsc-mcp`.
 - Initial MCP server exposing four read-only Google Search Console tools:
   `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
 
-[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/AkashRajpurohit/gsc-mcp/releases/tag/v0.2.0

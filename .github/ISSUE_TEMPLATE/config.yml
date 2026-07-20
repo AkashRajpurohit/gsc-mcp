@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/AkashRajpurohit/gsc-mcp/security/advisories/new
+    about: Please report security issues privately, not as a public issue.
+  - name: Setup and usage docs
+    url: https://github.com/AkashRajpurohit/gsc-mcp#readme
+    about: Installation, configuration, and troubleshooting.

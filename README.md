@@ -36,6 +36,7 @@ The server runs on your own machine and only ever reads. It uses Google's read-o
 - "What are my top 20 queries for example.com in the last 28 days?"
 - "Which queries get lots of impressions but a low CTR?"
 - "Show me the top pages for example.com on mobile."
+- "Which pages lost the most clicks this month compared to last month?"
 - "Is `https://example.com/blog/my-post/` indexed by Google?"
 - "How many URLs did my sitemap submit versus get indexed?"
 
@@ -226,7 +227,7 @@ Run `npx @akashrajpurohit/gsc-mcp doctor` first, since it catches most problems.
 
 ## Contributing
 
-Contributions are welcome. The project is small and has no build step.
+Contributions are welcome. The project is small and has no build step. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide and [ROADMAP.md](ROADMAP.md) for what is and is not planned.
 
 ```bash
 git clone https://github.com/AkashRajpurohit/gsc-mcp.git
