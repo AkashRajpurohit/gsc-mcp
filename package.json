@@ -1,6 +1,6 @@
 {
   "name": "@akashrajpurohit/gsc-mcp",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A safe, local, read-only MCP server that gives your AI assistant access to your Google Search Console data.",
   "type": "module",
   "license": "MIT",
