@@ -1,7 +1,7 @@
 {
-  "name": "gsc-mcp",
-  "version": "0.1.0",
-  "description": "An MCP server that gives your AI assistant read access to your Google Search Console properties.",
+  "name": "@akashrajpurohit/gsc-mcp",
+  "version": "0.2.0",
+  "description": "A safe, local, read-only MCP server that gives your AI assistant access to your Google Search Console data.",
   "type": "module",
   "license": "MIT",
   "author": "Akash Rajpurohit",
@@ -26,10 +26,23 @@
     "node": ">=22.5"
   },
   "bin": {
-    "gsc": "./cli.mjs"
+    "gsc-mcp": "./bin/gsc-mcp.mjs"
   },
+  "files": [
+    "bin/",
+    "lib/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "doctor": "node ./bin/gsc-mcp.mjs doctor",
+    "prepublishOnly": "npm test"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

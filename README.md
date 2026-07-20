@@ -29,9 +29,8 @@ It's built to be **safe by construction**:
 - 🏠 **Local & private.** It runs on your own machine and talks only to Google — no third-party server in the middle, no telemetry, no accounts.
 - 🗝️ **One credential, every property.** A single service-account key covers all the sites you own, so you can ask across properties without switching accounts.
 
-<!-- TODO: demo GIF — record with `asciinema rec demo.cast`, convert with `agg demo.cast demo.gif`, then replace the line below -->
 <div align="center">
-  <em>Demo coming soon.</em>
+  <img src="https://raw.githubusercontent.com/AkashRajpurohit/gsc-mcp/main/assets/demo.gif" alt="gsc-mcp in action — asking an assistant about Search Console data" width="100%" />
 </div>
 
 ## ✨ What it does and does not do
@@ -86,22 +85,20 @@ Adding a new site later is just one more grant here — no code or config change
 
 ## 🚀 Install
 
-```bash
-git clone https://github.com/AkashRajpurohit/gsc-mcp.git
-cd gsc-mcp
-npm install
-```
+No clone or global install needed — the server runs straight from npm with `npx`. Point your MCP client at it, and it fetches and runs on demand.
 
-Then register it with your assistant. Note the full path to `mcp.mjs` — you will need it below:
+First, confirm your setup is good with the built-in diagnostic:
 
 ```bash
-echo "$PWD/mcp.mjs"
+npx @akashrajpurohit/gsc-mcp doctor
 ```
+
+You should see all green checks (and a count of your accessible properties). Then register the server with your assistant.
 
 ### Claude Code
 
 ```bash
-claude mcp add gsc --scope user -- node "$PWD/mcp.mjs"
+claude mcp add gsc --scope user -- npx -y @akashrajpurohit/gsc-mcp
 ```
 
 `--scope user` registers it for every Claude Code session on the machine. Restart the session (or start a new one) to pick up the tools.
@@ -114,8 +111,8 @@ Open **Settings → Developer → Edit Config** (or edit `claude_desktop_config.
 {
   "mcpServers": {
     "gsc": {
-      "command": "node",
-      "args": ["/absolute/path/to/gsc-mcp/mcp.mjs"]
+      "command": "npx",
+      "args": ["-y", "@akashrajpurohit/gsc-mcp"]
     }
   }
 }
@@ -125,18 +122,7 @@ Restart Claude Desktop.
 
 ### Cursor
 
-Open **Settings → MCP → Add new global MCP server** (or edit `~/.cursor/mcp.json`) and add the same `gsc` entry as above:
-
-```json
-{
-  "mcpServers": {
-    "gsc": {
-      "command": "node",
-      "args": ["/absolute/path/to/gsc-mcp/mcp.mjs"]
-    }
-  }
-}
-```
+Open **Settings → MCP → Add new global MCP server** (or edit `~/.cursor/mcp.json`) and add the same `gsc` entry as above.
 
 ### Windsurf
 
@@ -150,20 +136,37 @@ Add it to `.vscode/mcp.json` in your workspace (or run **MCP: Add Server** from 
 {
   "servers": {
     "gsc": {
-      "command": "node",
-      "args": ["/absolute/path/to/gsc-mcp/mcp.mjs"]
+      "command": "npx",
+      "args": ["-y", "@akashrajpurohit/gsc-mcp"]
     }
   }
 }
 ```
 
-> If your key is not at the default path, add `"env": { "GSC_KEY_PATH": "/absolute/path/to/key.json" }` to any of the entries above.
-
 ### Any other MCP client
 
-Register a **stdio** server that runs `node /absolute/path/to/gsc-mcp/mcp.mjs`. That is all the server needs.
+Register a **stdio** server whose command is `npx -y @akashrajpurohit/gsc-mcp`. That is all the server needs.
+
+> If your key is not at the default path, add `"env": { "GSC_KEY_PATH": "/absolute/path/to/key.json" }` to any of the entries above.
 
 Once registered, start a new session and ask your assistant to "list my Search Console sites." If it comes back with your properties, you are ready.
+
+<details>
+<summary>Prefer to run from source?</summary>
+
+```bash
+git clone https://github.com/AkashRajpurohit/gsc-mcp.git
+cd gsc-mcp
+npm install
+```
+
+Then use `node /absolute/path/to/gsc-mcp/bin/gsc-mcp.mjs` as the command (instead of `npx -y @akashrajpurohit/gsc-mcp`) in any of the configs above. For Claude Code:
+
+```bash
+claude mcp add gsc --scope user -- node "$PWD/bin/gsc-mcp.mjs"
+```
+
+</details>
 
 ## 💬 How to use it
 
@@ -189,18 +192,19 @@ Every tool is **read-only** — the underlying credential physically cannot chan
 
 ## 🧪 Try it without an assistant
 
-There's a small CLI wrapping the same core, handy for a sanity check:
+The `gsc-mcp` command also wraps the same core for a quick manual check — no MCP client required:
 
 ```bash
-node cli.mjs sites
-node cli.mjs perf     "sc-domain:example.com"
-node cli.mjs pages    "sc-domain:example.com"
-node cli.mjs queries  "sc-domain:example.com"
-node cli.mjs inspect  "sc-domain:example.com" "https://example.com/blog/my-post/"
-node cli.mjs sitemaps "sc-domain:example.com"
+npx @akashrajpurohit/gsc-mcp doctor      # verify your setup
+npx @akashrajpurohit/gsc-mcp sites       # list your properties
+npx @akashrajpurohit/gsc-mcp queries  "sc-domain:example.com"
+npx @akashrajpurohit/gsc-mcp pages    "sc-domain:example.com"
+npx @akashrajpurohit/gsc-mcp perf     "sc-domain:example.com"
+npx @akashrajpurohit/gsc-mcp inspect  "sc-domain:example.com" "https://example.com/blog/my-post/"
+npx @akashrajpurohit/gsc-mcp sitemaps "sc-domain:example.com"
 ```
 
-Domain properties look like `sc-domain:example.com`; URL-prefix properties look like `https://example.com/`. Run `node cli.mjs sites` first to see the exact `siteUrl` for each of your properties.
+Domain properties look like `sc-domain:example.com`; URL-prefix properties look like `https://example.com/`. Run `sites` first to see the exact `siteUrl` for each of your properties. Run `gsc-mcp --help` for the full command list.
 
 ## ⚙️ Configuration
 
@@ -211,21 +215,37 @@ Domain properties look like `sc-domain:example.com`; URL-prefix properties look 
 ## 🏗️ How it fits together
 
 ```
-MCP client ──stdio──▶ mcp.mjs ──▶ gsc.mjs ──▶ Google Search Console API
-                      (tools)     (auth + calls)   (service-account key)
+MCP client ──stdio──▶ bin/gsc-mcp.mjs ──▶ lib/mcp.mjs ──▶ lib/gsc.mjs ──▶ Google Search Console API
+                      (CLI + server)      (tools)         (auth + calls)     (service-account key)
 ```
 
-- `gsc.mjs` — the Google API client. Authenticates with the service-account key and wraps the Search Console API (sites, search analytics, URL inspection, sitemaps).
-- `mcp.mjs` — the MCP server (stdio transport) that exposes those tools to your assistant.
-- `cli.mjs` — the same core, runnable by hand.
+- `lib/gsc.mjs` — the Google API client. Loads and validates the service-account key and wraps the Search Console API (sites, search analytics, URL inspection, sitemaps).
+- `lib/mcp.mjs` — the MCP server (stdio transport) that exposes those tools to your assistant, with input validation and secret-safe error handling.
+- `lib/doctor.mjs` — the diagnostic used by `gsc-mcp doctor`.
+- `bin/gsc-mcp.mjs` — the executable entry point: starts the server by default and provides `doctor`, `--help`, `--version`, and the manual read commands.
 
-The core (`gsc.mjs`) is transport-agnostic. To run this as an always-on remote MCP instead of a local stdio process, containerize it, expose it over HTTP/SSE behind an authenticating proxy, mount the key as a secret, and register the remote URL with your client — only the hosting changes.
+The core (`lib/gsc.mjs`) is transport-agnostic. To run this as an always-on remote MCP instead of a local stdio process, containerize it, expose it over HTTP/SSE behind an authenticating proxy, mount the key as a secret, and register the remote URL with your client — only the hosting changes.
 
-## 🩺 If it can't find your sites
+## 🔒 Security & privacy
+
+`gsc-mcp` is **safe by construction**: read-only by scope, local, and telemetry-free. In short — your assistant can look but never touch, and nothing leaves your machine except read-only calls to Google. See **[SECURITY.md](SECURITY.md)** for the full model and how to report a vulnerability.
+
+- **Read-only.** Uses Google's `webmasters.readonly` scope — the credential physically cannot write, submit, or delete.
+- **Local & private.** Runs on your machine, talks only to Google. No third-party server, no accounts, no telemetry.
+- **Credential-safe.** Your key is read locally and never sent anywhere but Google; `*key*.json` is git-ignored; and all errors are sanitized so key material can never leak into logs or transcripts.
+
+## 🩺 Troubleshooting
+
+Start with the diagnostic — it pinpoints most problems in one shot:
+
+```bash
+npx @akashrajpurohit/gsc-mcp doctor
+```
 
 - **`gsc_list_sites` returns an empty list** — the service account isn't granted on any property yet. Re-check step 2: the email you added in Search Console must match your key's `client_email` exactly.
 - **Auth or "file not found" errors** — the key isn't where the server expects it. Confirm the path, or set `GSC_KEY_PATH` to point at it.
 - **A specific property 403s** — that one property hasn't been shared with the service account. Add it under Users and permissions.
+- **"Search Console API ... is disabled"** — enable it once with `gcloud services enable searchconsole.googleapis.com` (or in the Cloud Console).
 
 ## 🧑‍💻 Contributing
 
@@ -238,7 +258,7 @@ npm install
 npm test
 ```
 
-Tests use Node's built-in test runner (`node --test`) — there is **no extra test dependency** to install. They are fully offline: every Google call is mocked or fixture-based, so **you do not need valid Google credentials to run them, and nothing touches the network.** The suite covers each MCP tool, the Search Console API wrapper, argument validation, credential loading (missing/malformed keys), and simulated Google API failures (permission, quota, invalid property, unavailable URL), and it asserts that credential material is never echoed in error messages.
+Tests use Node's built-in test runner (`node --test`) — there is **no extra test dependency** to install. They are fully offline: every Google call is mocked or fixture-based, so **you do not need valid Google credentials to run them, and nothing touches the network.** The suite covers each MCP tool, the Search Console API wrapper, argument validation, credential loading (missing/malformed keys), the `doctor` diagnostic, the CLI, and simulated Google API failures (permission, quota, invalid property, unavailable URL), and it asserts that credential material is never echoed in error messages.
 
 Run the suite with:
 
@@ -246,7 +266,17 @@ Run the suite with:
 npm test
 ```
 
-CI runs the same command on every push and pull request across supported Node.js versions (22.x and 24.x).
+CI runs the same command on every push and pull request. Releases are cut by pushing a `v*` tag, which triggers the publish workflow (see `.github/workflows/release.yml`). Publishing uses **npm trusted publishing (OIDC)** — no long-lived npm token is stored, and provenance is attached automatically. Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+
+### Project layout
+
+| File | Responsibility |
+|------|----------------|
+| `lib/gsc.mjs` | Google API client: credential loading + read-only Search Console calls. |
+| `lib/mcp.mjs` | MCP server, tool definitions, input validation, error sanitization. |
+| `lib/doctor.mjs` | Setup diagnostic used by `gsc-mcp doctor`. |
+| `bin/gsc-mcp.mjs` | Executable entry point (server + `doctor`/`--help`/`--version`/read commands). |
+| `test/` | Offline test suite. |
 
 ## ⚖️ Licensing and disclaimer
 

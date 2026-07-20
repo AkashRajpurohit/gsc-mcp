@@ -6,7 +6,7 @@ import {
   searchAnalytics,
   inspectUrl,
   listSitemaps,
-} from '../gsc.mjs';
+} from '../lib/gsc.mjs';
 
 function fakeClient(data) {
   const calls = {};

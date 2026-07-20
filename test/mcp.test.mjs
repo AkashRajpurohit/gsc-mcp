@@ -5,7 +5,7 @@ import {
   handleToolCall,
   buildAnalyticsBody,
   sanitize,
-} from '../mcp.mjs';
+} from '../lib/mcp.mjs';
 
 function fakeGsc(overrides = {}) {
   const calls = [];

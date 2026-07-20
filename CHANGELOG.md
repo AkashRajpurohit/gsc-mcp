@@ -1,0 +1,51 @@
+# Changelog
+
+All notable changes to this project are documented here.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.2.0] - 2026-07-20
+
+First release published to npm as `@akashrajpurohit/gsc-mcp`.
+
+### Added
+
+- Executable CLI (`gsc-mcp`), runnable with `npx @akashrajpurohit/gsc-mcp` — no clone required.
+  - `gsc-mcp` / `gsc-mcp serve` — start the MCP stdio server (default).
+  - `gsc-mcp doctor` — diagnose your setup: Node version, credentials file, credentials JSON,
+    Google authentication, Search Console API, accessible properties, and server startup.
+  - `gsc-mcp --help` and `gsc-mcp --version`.
+  - Convenience read commands for a quick manual check: `sites`, `queries`, `pages`, `perf`,
+    `inspect`, `sitemaps`.
+- Clear, early error when the Node.js version is below the supported minimum.
+- Reliability baseline: a `node:test` suite covering every MCP tool, the API wrapper, argument
+  validation, credential loading, the `doctor` diagnostic, the CLI, and simulated Google API
+  failures — all offline, no network, no real credentials required.
+- GitHub Actions CI running the test suite on pushes and pull requests.
+- Release automation via a tag-triggered publish workflow using npm trusted publishing (OIDC).
+- Input validation on all MCP tools (dates, dimensions, `rowLimit`, `searchType`).
+- Error sanitization so credential material can never appear in tool output, CLI errors, or logs.
+- `SECURITY.md` describing the security and privacy model, and a demo recording in the README.
+
+### Changed
+
+- Package renamed to `@akashrajpurohit/gsc-mcp` for scoped publishing.
+- The single `bin` is now `gsc-mcp` (previously `gsc`).
+- Credentials are read and validated up front, producing clear, secret-free errors.
+
+### Removed
+
+- The standalone `cli.mjs`; its commands are now part of the `gsc-mcp` binary.
+
+## [0.1.0] - 2026-06-29
+
+### Added
+
+- Initial MCP server exposing four read-only Google Search Console tools:
+  `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
+
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/AkashRajpurohit/gsc-mcp/releases/tag/v0.2.0

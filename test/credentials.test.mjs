@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { writeFileSync, mkdtempSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { keyPath, loadCredentials } from '../gsc.mjs';
+import { keyPath, loadCredentials } from '../lib/gsc.mjs';
 
 const savedEnv = process.env.GSC_KEY_PATH;
 const savedHome = process.env.HOME;
