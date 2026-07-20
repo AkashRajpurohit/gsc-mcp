@@ -120,6 +120,7 @@ This checks your Node version, credentials, Google authentication, and how many 
 | `gsc_list_sites`       | Lists the properties you can read and their exact `siteUrl` values.                                                                                         |
 | `gsc_search_analytics` | Clicks, impressions, CTR, and position, grouped by query, page, date, country, device, or search appearance. Supports filters, date ranges, and pagination. |
 | `compare_search_performance` | Compares two date periods and reports the change in clicks, impressions, CTR, and position. Can group by page, query, country, or device to find the biggest movers. |
+| `find_seo_opportunities` | Finds quick wins: striking-distance queries (ranking just off page 1) or page-1 queries and pages with low CTR. Computed in code and ranked by impressions. |
 | `gsc_inspect_url`      | Index status of a single URL (indexed or not, last crawl, canonical, coverage).                                                                             |
 | `gsc_list_sitemaps`    | Submitted versus indexed counts per sitemap, with any errors.                                                                                               |
 
@@ -193,6 +194,41 @@ Give it a current period (or `days`), and optionally a previous one. Without a p
 ```
 
 `summary` also covers impressions, CTR, and position. With `groupBy` (page, query, country, or device) you get `largestDeclines` and `largestGains`, ranked by clicks change. For position, lower is better, so a positive change means the average rank got worse.
+
+</details>
+
+<details>
+<summary>find_seo_opportunities response</summary>
+
+The default `striking_distance` type surfaces queries (or pages) ranking just off page 1, where a small ranking gain could win clicks. Set `type` to `low_ctr` to instead find page-1 queries and pages that get few clicks for their impressions.
+
+Request:
+
+```json
+{
+  "siteUrl": "sc-domain:example.com",
+  "type": "striking_distance",
+  "datePreset": "last_28_days",
+  "minImpressions": 200,
+  "limit": 5
+}
+```
+
+Response:
+
+```json
+{
+  "type": "striking_distance",
+  "dimension": "query",
+  "criteria": { "minPosition": 11, "maxPosition": 20, "minImpressions": 200 },
+  "count": 4,
+  "opportunities": [
+    { "query": "immich photo alternative", "clicks": 0, "impressions": 1620, "ctr": 0, "position": 17.7 }
+  ]
+}
+```
+
+Tune it with `minImpressions`, `minPosition` / `maxPosition` (striking-distance), `maxCtr` (low-CTR), `dimension` (`query` or `page`), and `limit`. Everything is computed in code and ranked by impressions.
 
 </details>
 

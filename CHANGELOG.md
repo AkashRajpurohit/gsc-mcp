@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- New tool `find_seo_opportunities`: surfaces quick wins from Search Console data, computed in code and ranked by impressions. `striking_distance` (default) finds queries or pages ranking just off page 1; `low_ctr` finds page-1 queries or pages with a low click-through rate. Tunable with `minImpressions`, position range, `maxCtr`, `dimension`, and `limit`.
+
 ## [0.6.0] - 2026-07-20
 
 ### Added
