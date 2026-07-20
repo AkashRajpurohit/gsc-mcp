@@ -118,6 +118,7 @@ This checks your Node version, credentials, Google authentication, and how many 
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `gsc_list_sites`       | Lists the properties you can read and their exact `siteUrl` values.                                                                                         |
 | `gsc_search_analytics` | Clicks, impressions, CTR, and position, grouped by query, page, date, country, device, or search appearance. Supports filters, date ranges, and pagination. |
+| `compare_search_performance` | Compares two date periods and reports the change in clicks, impressions, CTR, and position. Can group by page, query, country, or device to find the biggest movers. |
 | `gsc_inspect_url`      | Index status of a single URL (indexed or not, last crawl, canonical, coverage).                                                                             |
 | `gsc_list_sitemaps`    | Submitted versus indexed counts per sitemap, with any errors.                                                                                               |
 
@@ -159,6 +160,36 @@ Response:
 ```
 
 It also supports `dataState` (`final` or `all`), `aggregationType` (`auto`, `byProperty`, `byPage`), and automatic pagination past the API's 25,000-rows-per-request limit, capped by `maxRows`. Filter operators are `equals`, `notEquals`, `contains`, `notContains`, `includingRegex`, and `excludingRegex`, and multiple filters are combined with AND. `site` and `siteUrl` both work.
+
+</details>
+
+<details>
+<summary>compare_search_performance response</summary>
+
+Give it a current period (or `days`), and optionally a previous one. Without a previous period it uses the equal-length window right before the current one. The change is worked out in code, so the numbers are always consistent.
+
+```json
+{
+  "current": { "startDate": "2026-06-01", "endDate": "2026-06-30" },
+  "previous": { "startDate": "2026-05-02", "endDate": "2026-05-31" },
+  "summary": {
+    "clicks": { "current": 1840, "previous": 2160, "change": -320, "changePercent": -14.81 }
+  },
+  "groupBy": "page",
+  "largestDeclines": [
+    {
+      "page": "https://example.com/docs",
+      "currentClicks": 210,
+      "previousClicks": 390,
+      "change": -180,
+      "changePercent": -46.15
+    }
+  ],
+  "largestGains": []
+}
+```
+
+`summary` also covers impressions, CTR, and position. With `groupBy` (page, query, country, or device) you get `largestDeclines` and `largestGains`, ranked by clicks change. For position, lower is better, so a positive change means the average rank got worse.
 
 </details>
 

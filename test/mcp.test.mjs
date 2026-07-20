@@ -58,8 +58,9 @@ function pagedGsc(total) {
   };
 }
 
-test('TOOLS exposes exactly the four read-only tools', () => {
+test('TOOLS exposes exactly the read-only tools', () => {
   assert.deepEqual(TOOLS.map((t) => t.name).sort(), [
+    'compare_search_performance',
     'gsc_inspect_url',
     'gsc_list_sitemaps',
     'gsc_list_sites',

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-20
+
+### Added
+
+- New tool `compare_search_performance`: compares two date periods and returns clicks, impressions,
+  CTR, and average position for each, plus the absolute and percentage change, computed in code.
+  Optionally group by page, query, country, or device to get the biggest declines and gains. If the
+  previous period is not given, it defaults to the equal-length window immediately before the current
+  one. Filters, `searchType`, and `dataState` apply to both periods.
+
 ## [0.3.0] - 2026-07-20
 
 Completes the `gsc_search_analytics` tool.
@@ -69,6 +79,7 @@ First release published to npm as `@akashrajpurohit/gsc-mcp`.
 - Initial MCP server exposing four read-only Google Search Console tools:
   `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
 
-[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/AkashRajpurohit/gsc-mcp/releases/tag/v0.2.0
