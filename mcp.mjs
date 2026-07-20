@@ -1,16 +1,24 @@
 #!/usr/bin/env node
+import { realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { inspectUrl, listSitemaps, listSites, searchAnalytics } from './gsc.mjs';
+import * as gscApi from './gsc.mjs';
+
+const VERSION = '0.1.0';
 
 const ago = (d) => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
 const ok = (data) => ({ content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] });
+const err = (msg) => ({ content: [{ type: 'text', text: `Error: ${sanitize(msg)}` }], isError: true });
 
-const TOOLS = [
+const DIMENSIONS = ['date', 'query', 'page', 'country', 'device', 'searchAppearance'];
+const SEARCH_TYPES = ['web', 'image', 'video', 'news', 'discover'];
+
+export const TOOLS = [
   {
     name: 'gsc_list_sites',
     description:
@@ -64,34 +72,114 @@ const TOOLS = [
   },
 ];
 
-const server = new Server({ name: 'gsc', version: '0.1.0' }, { capabilities: { tools: {} } });
+export function sanitize(text) {
+  let s = String(text ?? '');
+  s = s.replace(
+    /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g,
+    '[REDACTED]',
+  );
+  s = s.replace(
+    /("?(?:private_key|access_token|refresh_token|client_secret|id_token|api_key)"?\s*[:=]\s*)"?[^"\s,}]+"?/gi,
+    '$1[REDACTED]',
+  );
+  return s;
+}
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
+class ToolError extends Error {}
 
-server.setRequestHandler(CallToolRequestSchema, async (req) => {
-  const { name, arguments: a = {} } = req.params;
-  try {
-    if (name === 'gsc_list_sites') return ok(await listSites());
-    if (name === 'gsc_search_analytics') {
-      const body = {
-        startDate: a.startDate ?? ago(a.days ?? 28),
-        endDate: a.endDate ?? ago(1),
-        dimensions: a.dimensions ?? ['query'],
-        rowLimit: a.rowLimit ?? 100,
-        type: a.searchType ?? 'web',
-      };
-      if (a.filterPage)
-        body.dimensionFilterGroups = [
-          { filters: [{ dimension: 'page', operator: 'contains', expression: a.filterPage }] },
-        ];
-      return ok(await searchAnalytics(a.site, body));
-    }
-    if (name === 'gsc_inspect_url') return ok(await inspectUrl(a.site, a.url));
-    if (name === 'gsc_list_sitemaps') return ok(await listSitemaps(a.site));
-    return { content: [{ type: 'text', text: `Unknown tool: ${name}` }], isError: true };
-  } catch (e) {
-    return { content: [{ type: 'text', text: `Error: ${e?.message || e}` }], isError: true };
+function requireString(args, key) {
+  if (typeof args[key] !== 'string' || args[key].trim() === '') {
+    throw new ToolError(`Missing or invalid required argument "${key}" (expected a non-empty string).`);
   }
-});
+}
 
-await server.connect(new StdioServerTransport());
+function validateAnalytics(a) {
+  if (a.days != null && (typeof a.days !== 'number' || !Number.isFinite(a.days) || a.days <= 0)) {
+    throw new ToolError('"days" must be a positive number.');
+  }
+  for (const key of ['startDate', 'endDate']) {
+    if (a[key] != null && (typeof a[key] !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(a[key]))) {
+      throw new ToolError(`"${key}" must be a date string in YYYY-MM-DD format.`);
+    }
+  }
+  if (a.dimensions != null) {
+    if (!Array.isArray(a.dimensions) || a.dimensions.length === 0) {
+      throw new ToolError('"dimensions" must be a non-empty array.');
+    }
+    for (const d of a.dimensions) {
+      if (!DIMENSIONS.includes(d)) {
+        throw new ToolError(`Unknown dimension "${d}". Allowed: ${DIMENSIONS.join(', ')}.`);
+      }
+    }
+  }
+  if (a.rowLimit != null) {
+    if (typeof a.rowLimit !== 'number' || !Number.isInteger(a.rowLimit) || a.rowLimit < 1 || a.rowLimit > 25000) {
+      throw new ToolError('"rowLimit" must be an integer between 1 and 25000.');
+    }
+  }
+  if (a.searchType != null && !SEARCH_TYPES.includes(a.searchType)) {
+    throw new ToolError(`Unknown searchType "${a.searchType}". Allowed: ${SEARCH_TYPES.join(', ')}.`);
+  }
+  if (a.filterPage != null && typeof a.filterPage !== 'string') {
+    throw new ToolError('"filterPage" must be a string.');
+  }
+}
+
+export function buildAnalyticsBody(a) {
+  const body = {
+    startDate: a.startDate ?? ago(a.days ?? 28),
+    endDate: a.endDate ?? ago(1),
+    dimensions: a.dimensions ?? ['query'],
+    rowLimit: a.rowLimit ?? 100,
+    type: a.searchType ?? 'web',
+  };
+  if (a.filterPage) {
+    body.dimensionFilterGroups = [
+      { filters: [{ dimension: 'page', operator: 'contains', expression: a.filterPage }] },
+    ];
+  }
+  return body;
+}
+
+export async function handleToolCall(name, args = {}, gsc = gscApi) {
+  const a = args ?? {};
+  try {
+    if (name === 'gsc_list_sites') return ok(await gsc.listSites());
+    if (name === 'gsc_search_analytics') {
+      requireString(a, 'site');
+      validateAnalytics(a);
+      return ok(await gsc.searchAnalytics(a.site, buildAnalyticsBody(a)));
+    }
+    if (name === 'gsc_inspect_url') {
+      requireString(a, 'site');
+      requireString(a, 'url');
+      return ok(await gsc.inspectUrl(a.site, a.url));
+    }
+    if (name === 'gsc_list_sitemaps') {
+      requireString(a, 'site');
+      return ok(await gsc.listSitemaps(a.site));
+    }
+    return err(`Unknown tool: ${name}`);
+  } catch (e) {
+    return err(e?.message || String(e));
+  }
+}
+
+export function start() {
+  const server = new Server({ name: 'gsc', version: VERSION }, { capabilities: { tools: {} } });
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
+  server.setRequestHandler(CallToolRequestSchema, async (req) =>
+    handleToolCall(req.params.name, req.params.arguments),
+  );
+  return server.connect(new StdioServerTransport());
+}
+
+function isMain(metaUrl) {
+  try {
+    return realpathSync(fileURLToPath(metaUrl)) === realpathSync(process.argv[1]);
+  } catch {
+    return false;
+  }
+}
+
+if (isMain(import.meta.url)) await start();

@@ -28,6 +28,9 @@
   "bin": {
     "gsc": "./cli.mjs"
   },
+  "scripts": {
+    "test": "node --test"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "googleapis": "^144.0.0"
