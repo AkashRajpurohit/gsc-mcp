@@ -246,9 +246,12 @@ Run `gsc-mcp --help` for the full list. Domain properties look like `sc-domain:e
 
 ## Configuration
 
-| Variable       | Default                      | Description                           |
-| -------------- | ---------------------------- | ------------------------------------- |
+| Variable | Default | Description |
+| --- | --- | --- |
 | `GSC_KEY_PATH` | `~/.config/gsc-mcp/key.json` | Path to the service-account JSON key. |
+| `GSC_TIMEOUT_MS` | `30000` | Per-request timeout in milliseconds. `0` disables it. |
+| `GSC_MAX_RETRIES` | `3` | How many times to retry transient failures (429, 5xx, dropped connections). `0` disables retries. |
+| `GSC_RETRY_BASE_MS` | `500` | Base delay for the exponential backoff between retries. |
 
 ## Security & privacy
 

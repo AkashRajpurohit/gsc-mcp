@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-20
+
+### Added
+
+- Network resilience: every Google API call now has a per-request timeout and automatically retries transient failures (HTTP 429 and 5xx, plus dropped connections) with exponential backoff and jitter. Permanent errors still fail fast. Configurable with `GSC_TIMEOUT_MS`, `GSC_MAX_RETRIES`, and `GSC_RETRY_BASE_MS`.
+
 ## [0.7.0] - 2026-07-20
 
 ### Added
@@ -104,7 +110,8 @@ First release published to npm as `@akashrajpurohit/gsc-mcp`.
 
 - Initial MCP server exposing four read-only Google Search Console tools: `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
 
-[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.1...v0.5.0
