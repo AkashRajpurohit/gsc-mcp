@@ -162,6 +162,8 @@ Response:
 
 It also supports `dataState` (`final` or `all`), `aggregationType` (`auto`, `byProperty`, `byPage`), and automatic pagination past the API's 25,000-rows-per-request limit, capped by `maxRows`. Filter operators are `equals`, `notEquals`, `contains`, `notContains`, `includingRegex`, and `excludingRegex`, and multiple filters are combined with AND. `site` and `siteUrl` both work.
 
+For a quick date range you can pass `datePreset` instead of computing dates: `last_7_days`, `last_28_days`, `last_3_months`, `last_6_months`, `last_12_months`, or `last_16_months` (each a rolling window ending yesterday). It works the same on `compare_search_performance`.
+
 </details>
 
 <details>

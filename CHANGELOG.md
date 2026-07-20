@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `datePreset` on `gsc_search_analytics` and `compare_search_performance`: a rolling window ending yesterday (`last_7_days`, `last_28_days`, `last_3_months`, `last_6_months`, `last_12_months`, `last_16_months`), so you do not have to compute start and end dates. It takes precedence over `days`; an explicit `startDate`/`endDate` still wins.
+
 ### Changed
 
 - Automated GitHub Release notes now include a link to the full changelog.

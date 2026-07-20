@@ -154,6 +154,22 @@ test('rejects a malformed date', async () => {
   assert.match(res.content[0].text, /YYYY-MM-DD/);
 });
 
+test('datePreset sets the current period and the previous period mirrors its length', async () => {
+  const gsc = makeGsc({});
+  await handleToolCall('compare_search_performance', { site: 's', datePreset: 'last_7_days' }, gsc);
+  const span = (b) => Math.round((Date.parse(`${b.endDate}T00:00:00Z`) - Date.parse(`${b.startDate}T00:00:00Z`)) / 864e5) + 1;
+  const [current, previous] = gsc.calls;
+  assert.equal(span(current), 7);
+  assert.equal(span(previous), 7);
+  assert.equal(Date.parse(`${previous.endDate}T00:00:00Z`), Date.parse(`${current.startDate}T00:00:00Z`) - 864e5);
+});
+
+test('rejects an unknown datePreset', async () => {
+  const res = await handleToolCall('compare_search_performance', { site: 's', datePreset: 'nope' }, makeGsc());
+  assert.equal(res.isError, true);
+  assert.match(res.content[0].text, /datePreset/);
+});
+
 test('errors without a site', async () => {
   const res = await handleToolCall('compare_search_performance', {}, makeGsc());
   assert.equal(res.isError, true);

@@ -308,6 +308,33 @@ test('rejects an unknown dataState', async () => {
   assert.match(res.content[0].text, /dataState/);
 });
 
+const yesterday = () => new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+const spanDays = (b) => Math.round((Date.parse(`${b.endDate}T00:00:00Z`) - Date.parse(`${b.startDate}T00:00:00Z`)) / 864e5) + 1;
+
+test('datePreset resolves to a rolling window ending yesterday', () => {
+  const week = buildAnalyticsBody({ datePreset: 'last_7_days' });
+  assert.equal(week.endDate, yesterday());
+  assert.equal(spanDays(week), 7);
+  assert.equal(spanDays(buildAnalyticsBody({ datePreset: 'last_3_months' })), 90);
+  assert.equal(spanDays(buildAnalyticsBody({ datePreset: 'last_16_months' })), 480);
+});
+
+test('an explicit startDate overrides datePreset', () => {
+  const body = buildAnalyticsBody({ datePreset: 'last_7_days', startDate: '2026-01-01', endDate: '2026-01-31' });
+  assert.equal(body.startDate, '2026-01-01');
+  assert.equal(body.endDate, '2026-01-31');
+});
+
+test('datePreset takes precedence over days', () => {
+  assert.equal(spanDays(buildAnalyticsBody({ datePreset: 'last_7_days', days: 28 })), 7);
+});
+
+test('an unknown datePreset is rejected', async () => {
+  const res = await handleToolCall('gsc_search_analytics', { site: 's', datePreset: 'last_year' }, fakeGsc());
+  assert.equal(res.isError, true);
+  assert.match(res.content[0].text, /datePreset/);
+});
+
 test('wraps rows with request metadata', async () => {
   const gsc = pagedGsc(3);
   const res = await handleToolCall(
