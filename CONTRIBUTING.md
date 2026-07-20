@@ -68,4 +68,8 @@ node bin/gsc-mcp.mjs sites
 
 ## Releases
 
-Maintainers cut releases by bumping the version, updating the CHANGELOG, and pushing a `v*` tag. The tag runs the publish workflow, which tests and publishes to npm using trusted publishing (OIDC). No tokens are stored, and provenance is attached automatically.
+To cut a release, add a `## [X.Y.Z]` section to `CHANGELOG.md`, then run `npm version <patch|minor|major>` and push with `git push origin main --follow-tags`.
+
+`npm version` checks that the CHANGELOG has a section for the new version, bumps `package.json`, commits, and creates a matching tag, so the tag and the version can never disagree. The pushed tag runs the publish workflow, which also fails if the tag does not match `package.json`, then tests, publishes to npm with trusted publishing (OIDC), and creates a GitHub Release. No tokens are stored, and provenance is attached automatically.
+
+To sign the tag, run `npm config set sign-git-tag true` once.

@@ -38,7 +38,8 @@
   "scripts": {
     "test": "node --test",
     "doctor": "node ./bin/gsc-mcp.mjs doctor",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "version": "node --input-type=commonjs -e \"const fs=require('fs');const v=require('./package.json').version;if(!fs.readFileSync('CHANGELOG.md','utf8').includes('## ['+v+']')){console.error('CHANGELOG.md has no ## ['+v+'] section. Add it before running npm version.');process.exit(1)}\" && git add CHANGELOG.md"
   },
   "publishConfig": {
     "access": "public",
