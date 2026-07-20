@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-20
+
 ### Added
 
 - New tool `find_seo_opportunities`: surfaces quick wins from Search Console data, computed in code and ranked by impressions. `striking_distance` (default) finds queries or pages ranking just off page 1; `low_ctr` finds page-1 queries or pages with a low click-through rate. Tunable with `minImpressions`, position range, `maxCtr`, `dimension`, and `limit`.
@@ -102,7 +104,8 @@ First release published to npm as `@akashrajpurohit/gsc-mcp`.
 
 - Initial MCP server exposing four read-only Google Search Console tools: `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
 
-[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.4.0...v0.4.1
