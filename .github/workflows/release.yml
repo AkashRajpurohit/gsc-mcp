@@ -34,5 +34,8 @@ jobs:
             /^## \[/ {if (flag) exit}
             flag {print}
           ' CHANGELOG.md)
-          [ -z "$NOTES" ] && NOTES="Release $TAG. See CHANGELOG.md."
+          [ -z "$NOTES" ] && NOTES="Release $TAG."
+          NOTES="$NOTES
+
+          **Full changelog:** ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md"
           gh release create "$TAG" --title "$TAG" --notes "$NOTES" --verify-tag
