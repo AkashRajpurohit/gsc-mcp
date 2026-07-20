@@ -121,8 +121,9 @@ This checks your Node version, credentials, Google authentication, and how many 
 | `gsc_search_analytics` | Clicks, impressions, CTR, and position, grouped by query, page, date, country, device, or search appearance. Supports filters, date ranges, and pagination. |
 | `compare_search_performance` | Compares two date periods and reports the change in clicks, impressions, CTR, and position. Can group by page, query, country, or device to find the biggest movers. |
 | `find_seo_opportunities` | Finds quick wins: striking-distance queries (ranking just off page 1) or page-1 queries and pages with low CTR. Computed in code and ranked by impressions. |
-| `gsc_inspect_url`      | Index status of a single URL (indexed or not, last crawl, canonical, coverage).                                                                             |
-| `gsc_list_sitemaps`    | Submitted versus indexed counts per sitemap, with any errors.                                                                                               |
+| `gsc_inspect_url` | Index status of a single URL (indexed or not, last crawl, canonical, coverage). |
+| `gsc_inspect_urls` | Batch index-status check for many URLs at once, with bounded concurrency. |
+| `gsc_list_sitemaps` | Submitted versus indexed counts per sitemap, with any errors. |
 
 Data comes straight from Search Console, so you see the same window Google shows everyone (about 16 months of history, with its usual sampling).
 

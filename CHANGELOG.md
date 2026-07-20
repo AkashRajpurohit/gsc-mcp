@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-20
+
+### Added
+
+- New tool `gsc_inspect_urls`: batch URL inspection with bounded concurrency. Inspects many URLs in one call and returns a compact index status per URL (verdict, coverage state, indexing state, canonical, last crawl). An individual URL that fails is reported with an error field without failing the whole batch. Tunable with `concurrency` (default 5, max 10) and `maxUrls` (default 50).
+
 ## [0.8.0] - 2026-07-20
 
 ### Added
@@ -110,7 +116,8 @@ First release published to npm as `@akashrajpurohit/gsc-mcp`.
 
 - Initial MCP server exposing four read-only Google Search Console tools: `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
 
-[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.5.0...v0.6.0

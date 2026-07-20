@@ -60,6 +60,7 @@ test('TOOLS exposes exactly the read-only tools', () => {
     'compare_search_performance',
     'find_seo_opportunities',
     'gsc_inspect_url',
+    'gsc_inspect_urls',
     'gsc_list_sitemaps',
     'gsc_list_sites',
     'gsc_search_analytics',
