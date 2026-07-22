@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-07-22
+
+### Fixed
+
+- The default key path now resolves through `os.homedir()` and `path.join()` instead of `$HOME`, so it works on Windows, where `HOME` is unset.
+
+### Changed
+
+- Tool input schemas now declare their numeric bounds (`minimum`, `maximum`, `exclusiveMinimum`), date formats, and non-empty array requirements, so a client can see the constraints the server already enforced. No accepted input changed.
+- The striking-distance and low-CTR defaults quoted in the `find_seo_opportunities` schema are now interpolated from the shared constants instead of being written out by hand, so the documented defaults cannot drift from the implemented ones.
+- CI now runs the test suite on Node 22.x as well as 24.x, so the declared `engines` floor of >=22.5 is actually verified.
+
+### Added
+
+- A schema conformance test that feeds every declared bound a violating value and asserts the runtime validators reject it, keeping the two layers in agreement.
+
 ## [1.0.0] - 2026-07-20
 
 First stable release. The seven tools and their input and output shapes are now considered stable.
@@ -124,7 +140,8 @@ First release published to npm as `@akashrajpurohit/gsc-mcp`.
 
 - Initial MCP server exposing four read-only Google Search Console tools: `gsc_list_sites`, `gsc_search_analytics`, `gsc_inspect_url`, and `gsc_list_sitemaps`.
 
-[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/AkashRajpurohit/gsc-mcp/compare/v0.7.0...v0.8.0
